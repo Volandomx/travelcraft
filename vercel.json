@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/itinerary-builder.html" },
+    { "source": "/pagos", "destination": "/payments.html" },
+    { "source": "/portal", "destination": "/traveler-portal.html" },
+    { "source": "/ia", "destination": "/ai-proposals.html" }
+  ]
+}

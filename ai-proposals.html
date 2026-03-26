@@ -640,8 +640,12 @@ RESPONDE ÚNICAMENTE EN JSON VÁLIDO con esta estructura exacta (sin backticks, 
       })
     });
     const data = await res.json();
-    const raw = data.content?.map(c => c.text||'').join('');
-    const clean = raw.replace(/```json|```/g,'').trim();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    if (!data.content || !data.content.length) throw new Error('Respuesta vacía de la IA');
+    const raw = data.content.map(c => c.text||'').join('');
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('La IA no devolvió JSON válido');
+    const clean = jsonMatch[0];
     const trip = JSON.parse(clean);
     clearInterval(stepTimer);
     renderResult(trip);

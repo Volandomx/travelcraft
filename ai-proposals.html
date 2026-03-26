@@ -633,13 +633,13 @@ RESPONDE ÚNICAMENTE EN JSON VÁLIDO con esta estructura exacta (sin backticks, 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 4000,
         system: systemPrompt,
         messages
       })
     });
-    const data = await res.json();
+    const rawText = await res.text(); let data; try { data = JSON.parse(rawText); } catch(pe) { throw new Error('Servidor: ' + rawText.substring(0,200)); }
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     if (!data.content || !data.content.length) throw new Error('Respuesta vacía de la IA');
     const raw = data.content.map(c => c.text||'').join('');

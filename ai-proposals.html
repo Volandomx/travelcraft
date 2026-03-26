@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA para Propuestas — TravelCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F4EF;
+  --surface: #FFFFFF;
+  --surface2: #F2EDE5;
+  --border: #E4DDD3;
+  --border2: #CFC7BA;
+  --text: #1A1714;
+  --muted: #7A7168;
+  --light: #B5ADA3;
+  --forest: #2B4A35;
+  --forest2: #1e3628;
+  --forest-light: #EBF2ED;
+  --gold: #B8922A;
+  --gold-light: #FBF5E6;
+  --coral: #C24A30;
+  --coral-light: #FAF0EC;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 4px 24px rgba(26,23,20,0.07);
+  --shadow-md: 0 8px 40px rgba(26,23,20,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+
+/* NAV */
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 58px;
+  display: flex; align-items: center; gap: 20px;
+  flex-shrink: 0; z-index: 20;
+}
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--forest); font-weight: 600; margin-right: 8px; }
+.nav-link { font-size: 13px; font-weight: 500; color: var(--muted); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.active { color: var(--forest); background: var(--forest-light); }
+
+/* MAIN LAYOUT */
+.app-body { flex: 1; display: grid; grid-template-columns: 420px 1fr; overflow: hidden; }
+
+/* LEFT PANEL — INPUT */
+.input-panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.panel-header { padding: 24px 24px 0; }
+.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; line-height: 1.2; }
+.panel-sub { font-size: 13px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.mode-tabs { display: flex; gap: 6px; margin-top: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.mode-tab {
+  flex: 1; padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s; color: var(--muted); background: transparent;
+}
+.mode-tab:hover { border-color: var(--border2); color: var(--text); }
+.mode-tab.active { border-color: var(--forest); background: var(--forest-light); color: var(--forest); }
+
+.input-form { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; display: flex; align-items: center; gap: 5px; }
+.form-label span { font-size: 14px; }
+.form-input, .form-select, .form-textarea {
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  background: var(--bg); outline: none; transition: border-color 0.15s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--forest); background: white; }
+.form-input::placeholder, .form-textarea::placeholder { color: var(--light); }
+.form-select option { background: white; }
+.form-textarea { resize: none; line-height: 1.6; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* STYLE TAGS */
+.style-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.style-tag {
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; background: white;
+}
+.style-tag:hover { border-color: var(--forest); color: var(--forest); }
+.style-tag.selected { border-color: var(--forest); background: var(--forest-light); color: var(--forest); font-weight: 600; }
+
+/* QUICK PROMPTS */
+.quick-prompts { display: flex; flex-direction: column; gap: 6px; }
+.quick-prompt {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: white;
+  font-size: 13px; color: var(--muted); cursor: pointer;
+  transition: all 0.15s; text-align: left; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 8px;
+}
+.quick-prompt:hover { border-color: var(--forest); color: var(--text); background: var(--forest-light); }
+.quick-prompt-icon { font-size: 16px; flex-shrink: 0; }
+
+/* PDF DROP */
+.pdf-drop {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg);
+}
+.pdf-drop:hover, .pdf-drop.dragover { border-color: var(--forest); background: var(--forest-light); }
+.pdf-drop-icon { font-size: 32px; margin-bottom: 8px; }
+.pdf-drop-text { font-size: 14px; font-weight: 500; color: var(--muted); }
+.pdf-drop-sub { font-size: 12px; color: var(--light); margin-top: 4px; }
+.pdf-file-info { display: flex; align-items: center; gap: 10px; background: var(--forest-light); border: 1.5px solid var(--forest); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 10px; }
+.pdf-filename { font-size: 13px; font-weight: 500; color: var(--forest); }
+.pdf-remove { margin-left: auto; font-size: 14px; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.pdf-remove:hover { background: var(--coral-light); color: var(--coral); }
+
+/* GENERATE BTN */
+.generate-footer { padding: 16px 24px; border-top: 1px solid var(--border); }
+.generate-btn {
+  width: 100%; padding: 14px;
+  background: var(--forest); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s; letter-spacing: 0.2px;
+}
+.generate-btn:hover:not(:disabled) { background: var(--forest2); }
+.generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.generate-btn .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RIGHT PANEL — OUTPUT */
+.output-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+/* EMPTY STATE */
+.empty-output {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 48px; text-align: center;
+}
+.empty-orb {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--forest-light), #d6e8db);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; border: 2px solid var(--forest-light);
+}
+.empty-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--text); }
+.empty-desc { font-size: 14px; color: var(--muted); max-width: 340px; line-height: 1.6; }
+.example-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.example-chip {
+  padding: 7px 14px; border-radius: 20px;
+  background: white; border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.example-chip:hover { border-color: var(--forest); color: var(--forest); background: var(--forest-light); }
+
+/* STREAMING STATE */
+.streaming-panel { flex: 1; overflow-y: auto; padding: 32px 36px; display: none; flex-direction: column; gap: 0; }
+.streaming-panel.visible { display: flex; }
+
+/* RESULT HEADER */
+.result-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px; padding-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+.result-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; line-height: 1.2; }
+.result-meta { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.result-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); background: var(--surface2); padding: 4px 10px; border-radius: 10px; }
+.result-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.result-btn {
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1.5px solid var(--border); background: white; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.result-btn:hover { border-color: var(--forest); color: var(--forest); background: var(--forest-light); }
+.result-btn.primary { background: var(--forest); color: white; border-color: var(--forest); }
+.result-btn.primary:hover { background: var(--forest2); }
+
+/* GENERATED DAYS */
+.gen-day { margin-bottom: 36px; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.gen-day-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px; padding: 14px 16px;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.gen-day-num {
+  width: 38px; height: 38px; border-radius: 9px;
+  background: var(--forest); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600;
+  flex-shrink: 0;
+}
+.gen-day-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; }
+.gen-day-theme { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.gen-activities { display: flex; flex-direction: column; gap: 10px; padding-left: 16px; border-left: 2px solid var(--border); margin-left: 18px; }
+.gen-activity {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  transition: all 0.15s;
+}
+.gen-activity:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.gen-act-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.gen-time { font-size: 12px; font-weight: 700; color: var(--forest); background: var(--forest-light); padding: 2px 8px; border-radius: 6px; }
+.gen-type-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px; }
+.pill-actividad { background: var(--forest-light); color: var(--forest); }
+.pill-hotel { background: #EBF1F8; color: #2A5A7A; }
+.pill-restaurante { background: var(--coral-light); color: var(--coral); }
+.pill-transporte { background: var(--gold-light); color: var(--gold); }
+.pill-vuelo { background: #EEF2FA; color: #3A5FBA; }
+.gen-act-name { font-size: 15px; font-weight: 600; }
+.gen-act-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+.gen-act-tip { font-size: 12px; color: var(--gold); background: var(--gold-light); padding: 6px 10px; border-radius: 6px; margin-top: 8px; display: inline-block; }
+
+/* LOADING INDICATOR */
+.loading-indicator {
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; gap: 20px; padding: 60px;
+  flex: 1;
+}
+.loading-indicator.visible { display: flex; }
+.loading-orb {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 3px solid var(--forest-light);
+  border-top-color: var(--forest);
+  animation: spin 1s linear infinite;
+}
+.loading-steps { display: flex; flex-direction: column; gap: 8px; text-align: center; }
+.loading-step { font-size: 14px; color: var(--muted); opacity: 0; transition: opacity 0.4s; }
+.loading-step.visible { opacity: 1; color: var(--text); font-weight: 500; }
+
+/* COST ESTIMATE */
+.cost-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.cost-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 14px; }
+.cost-rows { display: flex; flex-direction: column; gap: 8px; }
+.cost-row { display: flex; justify-content: space-between; font-size: 14px; }
+.cost-row.total { font-weight: 700; padding-top: 10px; border-top: 1px solid var(--border); font-size: 16px; color: var(--forest); }
+.cost-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">TravelCraft</div>
+  <span class="nav-link" onclick="window.location.href='itinerary-builder.html'">✦ Itinerarios</span>
+  <span class="nav-link" onclick="window.location.href='payments.html'">💳 Pagos</span>
+  <span class="nav-link" onclick="window.location.href='traveler-portal.html'">🌍 Portal viajero</span>
+  <span class="nav-link active">✨ IA Propuestas</span>
+</nav>
+
+<div class="app-body">
+
+  <!-- LEFT: INPUT PANEL -->
+  <div class="input-panel">
+    <div class="panel-header">
+      <div class="panel-title">Genera propuestas<br>con inteligencia artificial</div>
+      <div class="panel-sub">Describe el viaje y la IA crea un itinerario completo, listo para enviar a tu cliente.</div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tab-form" onclick="switchMode('form')">📝 Formulario</button>
+        <button class="mode-tab" id="tab-chat" onclick="switchMode('chat')">💬 Chat libre</button>
+        <button class="mode-tab" id="tab-pdf" onclick="switchMode('pdf')">📄 Desde PDF</button>
+      </div>
+    </div>
+
+    <!-- FORM MODE -->
+    <div class="input-form" id="formMode">
+      <div class="form-group">
+        <label class="form-label"><span>📍</span> Destino(s)</label>
+        <input class="form-input" id="f-dest" placeholder="Ej: Japón · Tokio, Kioto, Osaka">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span>📅</span> Duración</label>
+          <select class="form-select" id="f-days">
+            <option value="3">3 días</option>
+            <option value="5">5 días</option>
+            <option value="7" selected>7 días</option>
+            <option value="10">10 días</option>
+            <option value="14">14 días</option>
+            <option value="21">21 días</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span>👥</span> Viajeros</label>
+          <input class="form-input" id="f-pax" placeholder="Ej: pareja, familia 4p">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span>💰</span> Presupuesto</label>
+          <select class="form-select" id="f-budget">
+            <option value="económico">Económico</option>
+            <option value="estándar" selected>Estándar</option>
+            <option value="premium">Premium</option>
+            <option value="lujo">Lujo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span>🎯</span> Tipo de viaje</label>
+          <select class="form-select" id="f-type">
+            <option value="cultural">Cultural</option>
+            <option value="aventura">Aventura</option>
+            <option value="romántico">Romántico / Luna de miel</option>
+            <option value="familia">Familiar</option>
+            <option value="gastronomía">Gastronomía</option>
+            <option value="relax">Relax / Playa</option>
+            <option value="negocios">Negocios / MICE</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>✨</span> Estilo del viaje</label>
+        <div class="style-tags" id="styleTags">
+          <div class="style-tag" onclick="toggleTag(this)">🏛 Historia y arte</div>
+          <div class="style-tag" onclick="toggleTag(this)">🍜 Gastronomía local</div>
+          <div class="style-tag" onclick="toggleTag(this)">🌿 Naturaleza</div>
+          <div class="style-tag" onclick="toggleTag(this)">📸 Fotografía</div>
+          <div class="style-tag" onclick="toggleTag(this)">🛍 Compras</div>
+          <div class="style-tag" onclick="toggleTag(this)">🧘 Bienestar</div>
+          <div class="style-tag" onclick="toggleTag(this)">🎭 Vida nocturna</div>
+          <div class="style-tag" onclick="toggleTag(this)">🚵 Aventura extrema</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>💬</span> Peticiones especiales</label>
+        <textarea class="form-textarea" id="f-special" rows="3" placeholder="Ej: Celebran 25 aniversario. Les gusta el vino. Prefieren hoteles boutique sobre cadenas. El cliente tiene movilidad reducida."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>👤</span> Nombre del cliente</label>
+        <input class="form-input" id="f-client" placeholder="Ej: Familia Rodríguez">
+      </div>
+    </div>
+
+    <!-- CHAT MODE -->
+    <div class="input-form" id="chatMode" style="display:none">
+      <p style="font-size:14px;color:var(--muted);line-height:1.6">Describe el viaje con tus propias palabras, como si le hablaras a un colega. La IA entenderá el contexto y generará la propuesta.</p>
+      <div class="quick-prompts">
+        <button class="quick-prompt" onclick="setPrompt(this.dataset.p)" data-p="Necesito una propuesta para una pareja que quiere ir a Japón en primavera, 10 días, presupuesto medio-alto. Son foodies y les encanta la fotografía. Quieren ver los cerezos en Tokio y Kioto, y también algo de naturaleza en Hakone.">
+          <span class="quick-prompt-icon">🌸</span> Japón en primavera para foodies
+        </button>
+        <button class="quick-prompt" onclick="setPrompt(this.dataset.p)" data-p="Familia de 4 personas con niños de 8 y 12 años, quieren safari en Kenya 7 días. Presupuesto premium. Los niños están muy emocionados con ver leones y jirafas. Salida en agosto.">
+          <span class="quick-prompt-icon">🦁</span> Safari Kenia para familia con niños
+        </button>
+        <button class="quick-prompt" onclick="setPrompt(this.dataset.p)" data-p="Luna de miel en Maldivas, 5 noches, lujo total. La pareja quiere privacidad, snorkel, masajes en la playa y una cena romántica en el agua. Presupuesto sin límite.">
+          <span class="quick-prompt-icon">🏝</span> Luna de miel en Maldivas de lujo
+        </button>
+        <button class="quick-prompt" onclick="setPrompt(this.dataset.p)" data-p="Grupo de 10 amigos, 30 años, quieren hacer el Camino de Santiago en 8 días desde Sarria. Presupuesto económico. Albergues están bien. Quieren terminar en Santiago y celebrar con una buena cena.">
+          <span class="quick-prompt-icon">🚶</span> Camino de Santiago grupo amigos
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>💬</span> Tu descripción</label>
+        <textarea class="form-textarea" id="chatInput" rows="7" placeholder="Describe aquí el viaje que necesitas..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>👤</span> Nombre del cliente</label>
+        <input class="form-input" id="chat-client" placeholder="Ej: Sr. Gómez">
+      </div>
+    </div>
+
+    <!-- PDF MODE -->
+    <div class="input-form" id="pdfMode" style="display:none">
+      <p style="font-size:14px;color:var(--muted);line-height:1.6">Sube el PDF de una cotización, correo o documento del cliente. La IA extrae la información y genera el itinerario automáticamente.</p>
+      <div class="pdf-drop" id="pdfDrop"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handlePdfDrop(event)"
+        onclick="document.getElementById('pdfInput').click()">
+        <div class="pdf-drop-icon">📎</div>
+        <div class="pdf-drop-text">Arrastra tu PDF aquí o haz clic</div>
+        <div class="pdf-drop-sub">Cotizaciones, emails, Word convertido a PDF</div>
+        <input type="file" id="pdfInput" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0])">
+      </div>
+      <div class="pdf-file-info" id="pdfInfo" style="display:none">
+        <span style="font-size:20px">📄</span>
+        <span class="pdf-filename" id="pdfName">—</span>
+        <span class="pdf-remove" onclick="removePdf()">✕</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span>💬</span> Instrucciones adicionales</label>
+        <textarea class="form-textarea" id="pdfExtra" rows="3" placeholder="Ej: Añade sugerencias de restaurantes. Mejora las descripciones. El cliente prefiere hoteles boutique."></textarea>
+      </div>
+    </div>
+
+    <div class="generate-footer">
+      <button class="generate-btn" id="generateBtn" onclick="generate()">
+        <span id="btnIcon">✨</span>
+        <span id="btnText">Generar propuesta con IA</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: OUTPUT PANEL -->
+  <div class="output-panel">
+
+    <!-- EMPTY -->
+    <div class="empty-output" id="emptyOutput">
+      <div class="empty-orb">✨</div>
+      <div class="empty-title">Tu propuesta aparecerá aquí</div>
+      <div class="empty-desc">Configura los parámetros del viaje y presiona "Generar". La IA creará un itinerario completo con actividades, hoteles, restaurantes y presupuesto estimado.</div>
+      <div class="example-chips">
+        <div class="example-chip" onclick="loadExample('japon')">🗼 Japón 7 días</div>
+        <div class="example-chip" onclick="loadExample('toscana')">🍷 Toscana romántica</div>
+        <div class="example-chip" onclick="loadExample('patagonia')">🏔 Patagonia aventura</div>
+        <div class="example-chip" onclick="loadExample('marruecos')">🕌 Marruecos cultural</div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-indicator" id="loadingOutput">
+      <div class="loading-orb"></div>
+      <div class="loading-steps">
+        <div class="loading-step" id="ls1">Analizando el destino y preferencias...</div>
+        <div class="loading-step" id="ls2">Seleccionando las mejores actividades...</div>
+        <div class="loading-step" id="ls3">Añadiendo restaurantes y hoteles recomendados...</div>
+        <div class="loading-step" id="ls4">Calculando presupuesto estimado...</div>
+        <div class="loading-step" id="ls5">Redactando descripciones para el cliente...</div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="streaming-panel" id="resultOutput"></div>
+
+  </div>
+</div>
+
+<script>
+let currentMode = 'form';
+let pdfBase64 = null;
+let pdfFilename = null;
+let selectedStyles = [];
+
+function switchMode(mode) {
+  currentMode = mode;
+  ['form','chat','pdf'].forEach(m => {
+    document.getElementById(m+'Mode').style.display = m===mode ? 'flex' : 'none';
+    document.getElementById('tab-'+m).classList.toggle('active', m===mode);
+  });
+}
+
+function toggleTag(el) {
+  el.classList.toggle('selected');
+  selectedStyles = [...document.querySelectorAll('.style-tag.selected')].map(t => t.textContent.trim());
+}
+
+function setPrompt(text) { document.getElementById('chatInput').value = text; }
+
+function handlePdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdfDrop').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') handlePdfFile(file);
+}
+
+function handlePdfFile(file) {
+  if (!file) return;
+  pdfFilename = file.name;
+  const reader = new FileReader();
+  reader.onload = e => { pdfBase64 = e.target.result.split(',')[1]; };
+  reader.readAsDataURL(file);
+  document.getElementById('pdfName').textContent = file.name;
+  document.getElementById('pdfInfo').style.display = 'flex';
+}
+
+function removePdf() {
+  pdfBase64 = null; pdfFilename = null;
+  document.getElementById('pdfInfo').style.display = 'none';
+  document.getElementById('pdfInput').value = '';
+}
+
+function loadExample(key) {
+  const examples = {
+    japon: { dest:'Japón · Tokio, Kioto, Osaka, Hiroshima', days:'7', pax:'pareja', budget:'premium', type:'cultural', special:'Les encanta la gastronomía japonesa. Quieren ver el Monte Fuji. Primera vez en Asia.', client:'Sr. y Sra. Nakamura-González' },
+    toscana: { dest:'Toscana, Italia · Florencia, Siena, Volterra', days:'5', pax:'pareja aniversario', budget:'lujo', type:'romántico', special:'Celebran 10 aniversario. Apasionados del vino y la gastronomía. Quieren cenas íntimas con vistas al campo.', client:'Carlos y Valeria' },
+    patagonia: { dest:'Patagonia · Torres del Paine y El Calafate', days:'7', pax:'grupo 6 amigos, 35 años', budget:'estándar', type:'aventura', special:'Amantes del trekking. Quieren ver el Perito Moreno. Buen nivel físico. Sin problemas con condiciones climáticas exigentes.', client:'Grupo Aventureros' },
+    marruecos: { dest:'Marruecos · Marrakech, Fes, desierto del Sáhara', days:'7', pax:'familia 2 adultos 2 niños', budget:'estándar', type:'cultural', special:'Niños de 10 y 14 años. Primera vez en África. Quieren noche en jaima en el desierto y experiencias culturales auténticas.', client:'Familia Martínez' },
+  };
+  const ex = examples[key]; if (!ex) return;
+  switchMode('form');
+  document.getElementById('f-dest').value = ex.dest;
+  document.getElementById('f-days').value = ex.days;
+  document.getElementById('f-pax').value = ex.pax;
+  document.getElementById('f-budget').value = ex.budget;
+  document.getElementById('f-type').value = ex.type;
+  document.getElementById('f-special').value = ex.special;
+  document.getElementById('f-client').value = ex.client;
+}
+
+function buildPrompt() {
+  if (currentMode === 'chat') {
+    const txt = document.getElementById('chatInput').value.trim();
+    const client = document.getElementById('chat-client').value.trim();
+    if (!txt) return null;
+    return { userPrompt: txt + (client ? `\n\nNombre del cliente: ${client}` : ''), pdfBase64: null };
+  }
+  if (currentMode === 'pdf') {
+    const extra = document.getElementById('pdfExtra').value.trim();
+    if (!pdfBase64) return null;
+    return { userPrompt: `Analiza este documento PDF y genera un itinerario de viaje completo y atractivo. ${extra}`, pdfBase64 };
+  }
+  const dest = document.getElementById('f-dest').value.trim();
+  if (!dest) return null;
+  const days = document.getElementById('f-days').value;
+  const pax = document.getElementById('f-pax').value.trim() || 'viajeros';
+  const budget = document.getElementById('f-budget').value;
+  const type = document.getElementById('f-type').value;
+  const special = document.getElementById('f-special').value.trim();
+  const client = document.getElementById('f-client').value.trim();
+  const styles = selectedStyles.join(', ');
+
+  let prompt = `Genera un itinerario de viaje detallado y atractivo con estas características:
+- Destino: ${dest}
+- Duración: ${days} días
+- Viajeros: ${pax}
+- Presupuesto: ${budget}
+- Tipo de viaje: ${type}
+${styles ? `- Estilos preferidos: ${styles}` : ''}
+${special ? `- Notas especiales: ${special}` : ''}
+${client ? `- Cliente: ${client}` : ''}`;
+  return { userPrompt: prompt, pdfBase64: null };
+}
+
+async function generate() {
+  const prompt = buildPrompt();
+  if (!prompt) {
+    if (currentMode === 'pdf' && !pdfBase64) { alert('Por favor sube un PDF primero.'); return; }
+    alert('Por favor completa al menos el destino o la descripción del viaje.');
+    return;
+  }
+
+  // UI: loading state
+  document.getElementById('emptyOutput').style.display = 'none';
+  document.getElementById('loadingOutput').classList.add('visible');
+  document.getElementById('resultOutput').classList.remove('visible');
+  document.getElementById('resultOutput').innerHTML = '';
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Generando propuesta...</span>';
+
+  // Animate loading steps
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  steps.forEach(s => document.getElementById(s).classList.remove('visible'));
+  let si = 0;
+  const stepTimer = setInterval(() => {
+    if (si < steps.length) { document.getElementById(steps[si]).classList.add('visible'); si++; }
+  }, 900);
+
+  const systemPrompt = `Eres un experto agente de viajes con 20 años de experiencia creando propuestas de viaje premium que venden. 
+Tu tarea es generar itinerarios detallados, atractivos y vendedores.
+
+RESPONDE ÚNICAMENTE EN JSON VÁLIDO con esta estructura exacta (sin backticks, sin texto adicional):
+{
+  "tripName": "Nombre atractivo del viaje",
+  "client": "Nombre del cliente o 'Tu próxima aventura'",
+  "destination": "Destino principal",
+  "duration": "X días",
+  "travelers": "descripción de viajeros",
+  "budget": "rango de presupuesto estimado ej: $3,500–$4,200 USD por persona",
+  "highlight": "Una frase vendedora de 1 línea sobre el viaje",
+  "days": [
+    {
+      "dayNum": 1,
+      "name": "Nombre del día",
+      "theme": "Tema o eje del día en 5 palabras",
+      "activities": [
+        {
+          "time": "09:00",
+          "type": "actividad|hotel|restaurante|transporte|vuelo",
+          "name": "Nombre del lugar o actividad",
+          "description": "Descripción atractiva y detallada para el cliente (2-3 oraciones)",
+          "tip": "Consejo insider opcional (puede ser null)",
+          "included": true
+        }
+      ]
+    }
+  ],
+  "costBreakdown": {
+    "vuelos": "$X,XXX",
+    "hoteles": "$X,XXX",
+    "actividades": "$X,XXX",
+    "alimentacion": "$X,XXX",
+    "traslados": "$XXX",
+    "total": "$X,XXX–$X,XXX"
+  },
+  "included": ["item 1", "item 2", "item 3"],
+  "notIncluded": ["item 1", "item 2"]
+}`;
+
+  try {
+    const messages = [];
+    if (prompt.pdfBase64) {
+      messages.push({ role: 'user', content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: prompt.pdfBase64 } },
+        { type: 'text', text: prompt.userPrompt }
+      ]});
+    } else {
+      messages.push({ role: 'user', content: prompt.userPrompt });
+    }
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(c => c.text||'').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const trip = JSON.parse(clean);
+    clearInterval(stepTimer);
+    renderResult(trip);
+  } catch(e) {
+    clearInterval(stepTimer);
+    document.getElementById('loadingOutput').classList.remove('visible');
+    document.getElementById('emptyOutput').style.display = 'flex';
+    alert('Error al generar la propuesta. Intenta de nuevo.\n\n' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnIcon">✨</span><span id="btnText">Generar propuesta con IA</span>';
+  }
+}
+
+function renderResult(trip) {
+  document.getElementById('loadingOutput').classList.remove('visible');
+
+  const panel = document.getElementById('resultOutput');
+  panel.classList.add('visible');
+
+  const typeLabel = { actividad:'Actividad', hotel:'Hotel', restaurante:'Restaurante', transporte:'Transporte', vuelo:'Vuelo' };
+
+  let html = `
+    <div class="result-header">
+      <div>
+        <div class="result-title">${trip.tripName}</div>
+        <div class="result-meta">
+          <span class="result-chip">📍 ${trip.destination}</span>
+          <span class="result-chip">📅 ${trip.duration}</span>
+          <span class="result-chip">👥 ${trip.travelers}</span>
+          <span class="result-chip">💰 ${trip.budget}</span>
+        </div>
+        <div style="margin-top:10px;font-size:14px;color:var(--muted);font-style:italic">"${trip.highlight}"</div>
+      </div>
+      <div class="result-actions">
+        <button class="result-btn" onclick="regenerate()">↺ Regenerar</button>
+        <button class="result-btn primary" onclick="exportToBuilder(${JSON.stringify(trip).replace(/"/g,'&quot;')})">→ Abrir en editor</button>
+      </div>
+    </div>`;
+
+  // Days
+  trip.days.forEach((day, i) => {
+    html += `<div class="gen-day" style="animation-delay:${i*0.07}s">
+      <div class="gen-day-header">
+        <div class="gen-day-num">${day.dayNum}</div>
+        <div><div class="gen-day-name">${day.name}</div><div class="gen-day-theme">${day.theme}</div></div>
+      </div>
+      <div class="gen-activities">
+        ${day.activities.map(a => `
+        <div class="gen-activity">
+          <div class="gen-act-top">
+            <span class="gen-time">${a.time}</span>
+            <span class="gen-type-pill pill-${a.type}">${typeLabel[a.type]||a.type}</span>
+            ${a.included ? '<span style="font-size:11px;color:var(--forest);background:var(--forest-light);padding:2px 8px;border-radius:8px;font-weight:600">✓ Incluido</span>' : ''}
+          </div>
+          <div class="gen-act-name">${a.name}</div>
+          <div class="gen-act-desc">${a.description}</div>
+          ${a.tip ? `<div class="gen-act-tip">💡 ${a.tip}</div>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Cost breakdown
+  if (trip.costBreakdown) {
+    html += `<div class="cost-card">
+      <div class="cost-title">💰 Desglose de costos estimados</div>
+      <div class="cost-rows">
+        ${trip.costBreakdown.vuelos ? `<div class="cost-row"><span>✈️ Vuelos</span><span>${trip.costBreakdown.vuelos}</span></div>` : ''}
+        ${trip.costBreakdown.hoteles ? `<div class="cost-row"><span>🏨 Hoteles</span><span>${trip.costBreakdown.hoteles}</span></div>` : ''}
+        ${trip.costBreakdown.actividades ? `<div class="cost-row"><span>🎭 Actividades y entradas</span><span>${trip.costBreakdown.actividades}</span></div>` : ''}
+        ${trip.costBreakdown.alimentacion ? `<div class="cost-row"><span>🍽 Alimentación</span><span>${trip.costBreakdown.alimentacion}</span></div>` : ''}
+        ${trip.costBreakdown.traslados ? `<div class="cost-row"><span>🚌 Traslados</span><span>${trip.costBreakdown.traslados}</span></div>` : ''}
+        <div class="cost-row total"><span>Total estimado por persona</span><span>${trip.costBreakdown.total}</span></div>
+      </div>
+      <div class="cost-note">* Precios referenciales. El costo final puede variar según disponibilidad y temporada.</div>
+    </div>`;
+  }
+
+  // Included / not included
+  if (trip.included || trip.notIncluded) {
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+      <div style="background:var(--forest-light);border:1px solid rgba(43,74,53,0.2);border-radius:var(--radius);padding:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--forest);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">✅ Incluido</div>
+        ${(trip.included||[]).map(i => `<div style="font-size:13px;color:var(--forest);padding:4px 0;display:flex;gap:6px"><span>•</span>${i}</div>`).join('')}
+      </div>
+      <div style="background:#FBF5F5;border:1px solid rgba(194,74,48,0.15);border-radius:var(--radius);padding:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--coral);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">❌ No incluido</div>
+        ${(trip.notIncluded||[]).map(i => `<div style="font-size:13px;color:var(--coral);padding:4px 0;display:flex;gap:6px"><span>•</span>${i}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  panel.innerHTML = html;
+}
+
+function regenerate() { generate(); }
+
+function exportToBuilder(tripData) {
+  try {
+    const t = typeof tripData === 'string' ? JSON.parse(tripData) : tripData;
+    localStorage.setItem('travelcraft_import', JSON.stringify(t));
+    alert('✅ Propuesta lista para abrir en el editor.\n\nEn la versión completa, esto abre el Creador de Itinerarios con todos los días y actividades ya cargados y listos para editar.');
+  } catch(e) {
+    alert('Error exportando. ' + e.message);
+  }
+}
+</script>
+</body>
+</html>

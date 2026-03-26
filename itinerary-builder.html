@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creador de Itinerarios — TravelCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F2ED;
+    --surface: #FFFFFF;
+    --surface2: #FAF8F5;
+    --border: #E8E3DA;
+    --text: #1A1714;
+    --text-muted: #7A7168;
+    --text-light: #B0A99E;
+    --accent: #2D5A3D;
+    --accent-light: #EBF3EE;
+    --accent-hover: #234830;
+    --coral: #D4553A;
+    --coral-light: #FBF0EC;
+    --amber: #C4860A;
+    --amber-light: #FBF4E6;
+    --blue: #2C5F8A;
+    --blue-light: #EBF2F8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ---- LAYOUT ---- */
+  .app { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: 64px 1fr; height: 100vh; overflow: hidden; }
+
+  /* ---- HEADER ---- */
+  header {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    z-index: 10;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.3px; }
+  .logo span { color: var(--coral); }
+  .trip-title-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .trip-title-input:hover, .trip-title-input:focus { background: var(--bg); }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-ghost { background: transparent; color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-coral { background: var(--coral); color: white; }
+  .btn-coral:hover { background: #b84430; }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-title { font-size: 12px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+  .trip-meta { display: flex; flex-direction: column; gap: 8px; }
+  .meta-row { display: flex; align-items: center; gap: 8px; }
+  .meta-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .meta-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    padding: 4px 6px;
+    border-radius: 4px;
+  }
+  .meta-input:hover, .meta-input:focus { background: var(--bg); }
+
+  .days-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .day-tab {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    border: 1.5px solid transparent;
+  }
+  .day-tab:hover { background: var(--bg); }
+  .day-tab.active { background: var(--accent-light); border-color: var(--accent); }
+  .day-num {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .day-tab.active .day-num { background: var(--accent); color: white; }
+  .day-info { flex: 1; min-width: 0; }
+  .day-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-count { font-size: 11px; color: var(--text-light); }
+  .day-delete { opacity: 0; width: 20px; height: 20px; border-radius: 4px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 14px; transition: all 0.15s; }
+  .day-tab:hover .day-delete { opacity: 1; }
+  .day-delete:hover { background: #fde8e4; color: var(--coral); }
+
+  .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+  .add-day-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .add-day-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ---- MAIN ---- */
+  .main { overflow-y: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+  .day-header { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+  .day-badge {
+    background: var(--accent); color: white;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .day-title-input {
+    flex: 1;
+    border: none; background: transparent;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 600;
+    color: var(--text);
+    outline: none; padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .day-title-input:hover, .day-title-input:focus { background: rgba(0,0,0,0.03); }
+  .day-date { font-size: 13px; color: var(--text-light); }
+
+  /* ---- ACTIVITIES ---- */
+  .activities-container { display: flex; flex-direction: column; gap: 10px; }
+
+  .activity-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: 14px;
+    align-items: start;
+    transition: all 0.15s;
+    cursor: default;
+    position: relative;
+  }
+  .activity-card:hover { border-color: #ccc7be; box-shadow: var(--shadow); }
+  .activity-card.dragging { opacity: 0.5; }
+  .activity-card.drag-over { border-color: var(--accent); background: var(--accent-light); }
+
+  .activity-time-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .activity-time {
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    background: var(--accent-light);
+    padding: 3px 8px; border-radius: 6px;
+    white-space: nowrap;
+  }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); margin-top: 4px; }
+  .activity-line { flex: 1; width: 2px; background: var(--border); border-radius: 1px; min-height: 20px; }
+
+  .activity-content { flex: 1; }
+  .activity-type-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .type-hotel { background: var(--blue-light); color: var(--blue); }
+  .type-vuelo { background: #EEF0FB; color: #3A47B8; }
+  .type-actividad { background: var(--accent-light); color: var(--accent); }
+  .type-restaurante { background: var(--coral-light); color: var(--coral); }
+  .type-transporte { background: var(--amber-light); color: var(--amber); }
+
+  .activity-name {
+    font-size: 15px; font-weight: 600; color: var(--text);
+    border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    outline: none; padding: 2px 4px; border-radius: 4px;
+    width: 100%; transition: background 0.15s;
+  }
+  .activity-name:hover, .activity-name:focus { background: var(--bg); }
+
+  .activity-desc {
+    font-size: 13px; color: var(--text-muted);
+    border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    outline: none; padding: 2px 4px; border-radius: 4px;
+    width: 100%; resize: none; overflow: hidden;
+    transition: background 0.15s; margin-top: 2px;
+  }
+  .activity-desc:hover, .activity-desc:focus { background: var(--bg); }
+
+  .activity-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .activity-card:hover .activity-actions { opacity: 1; }
+  .icon-btn {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: all 0.15s; color: var(--text-muted);
+  }
+  .icon-btn:hover { border-color: var(--coral); color: var(--coral); background: var(--coral-light); }
+
+  /* ---- ADD ACTIVITY ---- */
+  .add-activity-section { margin-top: 4px; }
+  .add-activity-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .add-activity-trigger:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .add-activity-form {
+    background: var(--surface);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow);
+  }
+  .add-activity-form.visible { display: flex; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select {
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text);
+    background: var(--bg);
+    outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); background: white; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ---- PREVIEW PANEL ---- */
+  .preview-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-overlay.open { display: flex; }
+  .preview-panel {
+    background: white;
+    width: 700px;
+    max-height: 90vh;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .preview-header {
+    padding: 20px 28px;
+    background: var(--accent);
+    color: white;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .preview-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; }
+  .preview-subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+  .preview-close {
+    width: 36px; height: 36px;
+    border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.3);
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 18px;
+    transition: background 0.15s;
+  }
+  .preview-close:hover { background: rgba(255,255,255,0.15); }
+  .preview-body { overflow-y: auto; padding: 28px; flex: 1; }
+  .preview-day { margin-bottom: 28px; }
+  .preview-day-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+  .preview-day-num {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .preview-day-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
+  .preview-activity {
+    display: flex; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-activity:last-child { border-bottom: none; }
+  .preview-time { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 48px; }
+  .preview-act-name { font-size: 14px; font-weight: 500; }
+  .preview-act-desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---- AI PANEL ---- */
+  .ai-panel {
+    position: fixed; right: 0; top: 64px; bottom: 0;
+    width: 340px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 50;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.06);
+  }
+  .ai-panel.open { transform: translateX(0); }
+  .ai-panel-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ai-panel-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .ai-badge { background: var(--coral); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; }
+  .ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ai-msg { padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; max-width: 90%; }
+  .ai-msg.assistant { background: var(--bg); color: var(--text); border-bottom-left-radius: 3px; }
+  .ai-msg.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+  .ai-msg.loading { background: var(--bg); }
+  .ai-input-area { padding: 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+  .ai-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ai-suggestion {
+    padding: 5px 10px; border-radius: 14px;
+    border: 1.5px solid var(--border); background: white;
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .ai-suggestion:hover { border-color: var(--coral); color: var(--coral); background: var(--coral-light); }
+  .ai-input-row { display: flex; gap: 8px; }
+  .ai-text-input {
+    flex: 1; padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    outline: none; background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .ai-text-input:focus { border-color: var(--coral); background: white; }
+  .ai-send-btn {
+    width: 38px; height: 38px;
+    background: var(--coral); color: white;
+    border: none; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background 0.15s; flex-shrink: 0;
+  }
+  .ai-send-btn:hover { background: #b84430; }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 40px; text-align: center;
+  }
+  .empty-icon { font-size: 40px; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--text); }
+  .empty-desc { font-size: 14px; color: var(--text-muted); max-width: 300px; line-height: 1.5; }
+
+  /* ---- scrollbar ---- */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ---- typing dots ---- */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing span { width: 6px; height: 6px; background: var(--text-light); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Travel<span>Craft</span></div>
+    <input class="trip-title-input" id="tripTitle" value="Aventura por Italia — 7 días" placeholder="Nombre del viaje...">
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="toggleAI()">✦ IA Asistente</button>
+      <button class="btn btn-outline" onclick="openPreview()">👁 Vista previa</button>
+      <button class="btn btn-primary" onclick="saveTrip()">💾 Guardar</button>
+      <button class="btn btn-coral" onclick="shareTrip()">↗ Compartir</button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Información del viaje</div>
+      <div class="trip-meta">
+        <div class="meta-row">
+          <div class="meta-icon">📍</div>
+          <input class="meta-input" value="Italia" placeholder="Destino...">
+        </div>
+        <div class="meta-row">
+          <div class="meta-icon">👤</div>
+          <input class="meta-input" id="clientName" value="Familia García" placeholder="Cliente...">
+        </div>
+        <div class="meta-row">
+          <div class="meta-icon">📅</div>
+          <input class="meta-input" type="date" id="startDate" value="2025-06-14">
+        </div>
+        <div class="meta-row">
+          <div class="meta-icon">👥</div>
+          <input class="meta-input" value="4 personas" placeholder="Pasajeros...">
+        </div>
+      </div>
+    </div>
+
+    <div class="days-list" id="daysList"></div>
+
+    <div class="sidebar-footer">
+      <button class="add-day-btn" onclick="addDay()">+ Añadir día</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main"></main>
+
+</div>
+
+<!-- PREVIEW OVERLAY -->
+<div class="preview-overlay" id="previewOverlay" onclick="closePreview(event)">
+  <div class="preview-panel">
+    <div class="preview-header">
+      <div>
+        <div class="preview-title" id="previewTitle">—</div>
+        <div class="preview-subtitle" id="previewSubtitle">—</div>
+      </div>
+      <button class="preview-close" onclick="closePreviewBtn()">✕</button>
+    </div>
+    <div class="preview-body" id="previewBody"></div>
+  </div>
+</div>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">
+      <span>✦ Asistente de viajes</span>
+      <span class="ai-badge">IA</span>
+    </div>
+    <button class="icon-btn" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="ai-msg assistant">
+      ¡Hola! Soy tu asistente de viajes. Puedo ayudarte a generar actividades, sugerir itinerarios completos o mejorar las descripciones de tu propuesta. ¿Qué necesitas?
+    </div>
+  </div>
+  <div class="ai-input-area">
+    <div class="ai-suggestions">
+      <div class="ai-suggestion" onclick="sendAIMessage('Genera actividades para Roma')">🏛 Actividades Roma</div>
+      <div class="ai-suggestion" onclick="sendAIMessage('Sugiere restaurantes para Florencia')">🍝 Restaurantes</div>
+      <div class="ai-suggestion" onclick="sendAIMessage('Completa el itinerario del día activo con actividades interesantes')">✨ Completar día</div>
+      <div class="ai-suggestion" onclick="sendAIMessage('Mejora las descripciones de las actividades para que sean más vendedoras')">📝 Mejorar textos</div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-text-input" id="aiInput" placeholder="Escribe tu consulta..." onkeydown="handleAIKey(event)">
+      <button class="ai-send-btn" onclick="sendAIFromInput()">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- STATE ----
+let state = {
+  activeDay: 0,
+  days: [
+    {
+      id: 1, name: "Llegada a Roma", date: "2025-06-14",
+      activities: [
+        { id: 1, time: "14:00", type: "vuelo", name: "Llegada al aeropuerto de Fiumicino", desc: "Recepción con guía privado y traslado al hotel en vehículo de lujo." },
+        { id: 2, time: "17:00", type: "hotel", name: "Check-in Hotel Artemide ★★★★", desc: "Hotel boutique en el centro histórico, a pasos del Coliseo." },
+        { id: 3, time: "20:00", type: "restaurante", name: "Cena en Osteria dell'Angelo", desc: "Auténtica cocina romana. Recomendamos la cacio e pepe y el tiramisú de la casa." }
+      ]
+    },
+    {
+      id: 2, name: "Roma clásica", date: "2025-06-15",
+      activities: [
+        { id: 4, time: "09:00", type: "actividad", name: "Coliseo y Foro Romano", desc: "Visita guiada privada con acceso preferente. Duración aproximada 3 horas." },
+        { id: 5, time: "13:00", type: "restaurante", name: "Almuerzo en el Trastevere", desc: "Tiempo libre para descubrir los restaurantes locales del barrio más bohemio de Roma." },
+        { id: 6, time: "15:30", type: "actividad", name: "Plaza Navona y Fontana di Trevi", desc: "Paseo por los monumentos más icónicos del centro histórico con guía local." }
+      ]
+    },
+    {
+      id: 3, name: "Florencia", date: "2025-06-16",
+      activities: [
+        { id: 7, time: "08:00", type: "transporte", name: "Tren a Florencia (Trenitalia)", desc: "Tren de alta velocidad. Duración 1h 30min. Billetes incluidos." },
+        { id: 8, time: "11:00", type: "actividad", name: "Galería de los Uffizi", desc: "Colección de arte renacentista más importante del mundo. Tickets con acceso prioritario incluidos." },
+        { id: 9, time: "19:00", type: "hotel", name: "Check-in Hotel Savoy ★★★★★", desc: "Ubicado en la Plaza de la Repubblica, el corazón de Florencia." }
+      ]
+    }
+  ]
+};
+
+// ---- RENDER ----
+function render() {
+  renderSidebar();
+  renderMain();
+}
+
+function renderSidebar() {
+  const list = document.getElementById('daysList');
+  list.innerHTML = state.days.map((day, i) => `
+    <div class="day-tab ${i === state.activeDay ? 'active' : ''}" onclick="selectDay(${i})">
+      <div class="day-num">${i + 1}</div>
+      <div class="day-info">
+        <div class="day-name">${day.name}</div>
+        <div class="day-count">${day.activities.length} actividades</div>
+      </div>
+      <button class="day-delete" onclick="deleteDay(event, ${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  if (state.days.length === 0) {
+    main.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🗺</div>
+        <div class="empty-title">Comienza tu itinerario</div>
+        <div class="empty-desc">Añade el primer día de tu viaje para empezar a construir la propuesta.</div>
+        <button class="btn btn-primary" onclick="addDay()">+ Añadir primer día</button>
+      </div>`;
+    return;
+  }
+
+  const day = state.days[state.activeDay];
+  main.innerHTML = `
+    <div class="day-header">
+      <span class="day-badge">Día ${state.activeDay + 1}</span>
+      <input class="day-title-input" value="${day.name}" onchange="updateDayName(this.value)" placeholder="Nombre del día...">
+      <span class="day-date">${formatDate(day.date)}</span>
+    </div>
+
+    <div class="activities-container" id="activitiesContainer">
+      ${day.activities.map((act, i) => renderActivity(act, i)).join('')}
+    </div>
+
+    <div class="add-activity-section">
+      <div class="add-activity-form" id="addForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="newType">
+              <option value="actividad">🏛 Actividad</option>
+              <option value="hotel">🏨 Hotel</option>
+              <option value="restaurante">🍽 Restaurante</option>
+              <option value="transporte">🚂 Transporte</option>
+              <option value="vuelo">✈️ Vuelo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hora</label>
+            <input class="form-input" type="time" id="newTime" value="10:00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input class="form-input" id="newName" placeholder="Ej: Visita al Coliseo...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-input" id="newDesc" rows="2" placeholder="Descripción detallada para el cliente..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="hideAddForm()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveActivity()">Guardar actividad</button>
+        </div>
+      </div>
+      <button class="add-activity-trigger" id="addTrigger" onclick="showAddForm()">
+        <span>+</span> <span>Añadir actividad</span>
+      </button>
+    </div>
+  `;
+}
+
+function renderActivity(act, i) {
+  const typeLabels = { hotel:'Hotel', vuelo:'Vuelo', actividad:'Actividad', restaurante:'Restaurante', transporte:'Transporte' };
+  return `
+    <div class="activity-card" draggable="true"
+      ondragstart="dragStart(event, ${i})"
+      ondragover="dragOver(event)"
+      ondrop="drop(event, ${i})"
+      ondragleave="dragLeave(event)">
+      <div class="activity-time-col">
+        <div class="activity-time">${act.time}</div>
+        <div class="activity-dot"></div>
+        <div class="activity-line"></div>
+      </div>
+      <div class="activity-content">
+        <span class="activity-type-badge type-${act.type}">${typeLabels[act.type] || act.type}</span>
+        <input class="activity-name" value="${act.name}" onchange="updateActivity(${act.id}, 'name', this.value)">
+        <textarea class="activity-desc" rows="2" onchange="updateActivity(${act.id}, 'desc', this.value)">${act.desc}</textarea>
+      </div>
+      <div class="activity-actions">
+        <button class="icon-btn" title="Mover arriba" onclick="moveActivity(${i}, -1)">↑</button>
+        <button class="icon-btn" title="Mover abajo" onclick="moveActivity(${i}, 1)">↓</button>
+        <button class="icon-btn" title="Eliminar" onclick="deleteActivity(${act.id})">🗑</button>
+      </div>
+    </div>`;
+}
+
+// ---- HELPERS ----
+function formatDate(d) {
+  if (!d) return '';
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(d + 'T12:00:00').toLocaleDateString('es-ES', opts);
+}
+
+// ---- ACTIONS ----
+function selectDay(i) { state.activeDay = i; render(); }
+
+function addDay() {
+  const lastDay = state.days[state.days.length - 1];
+  const newDate = lastDay ? addDays(lastDay.date, 1) : '2025-06-14';
+  state.days.push({ id: Date.now(), name: `Día en destino`, date: newDate, activities: [] });
+  state.activeDay = state.days.length - 1;
+  render();
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+function deleteDay(e, i) {
+  e.stopPropagation();
+  if (state.days.length <= 1) { alert('Debe haber al menos un día.'); return; }
+  state.days.splice(i, 1);
+  if (state.activeDay >= state.days.length) state.activeDay = state.days.length - 1;
+  render();
+}
+
+function updateDayName(val) { state.days[state.activeDay].name = val; renderSidebar(); }
+
+function showAddForm() {
+  document.getElementById('addForm').classList.add('visible');
+  document.getElementById('addTrigger').style.display = 'none';
+  document.getElementById('newName').focus();
+}
+
+function hideAddForm() {
+  document.getElementById('addForm').classList.remove('visible');
+  document.getElementById('addTrigger').style.display = '';
+}
+
+function saveActivity() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) return;
+  state.days[state.activeDay].activities.push({
+    id: Date.now(),
+    time: document.getElementById('newTime').value,
+    type: document.getElementById('newType').value,
+    name,
+    desc: document.getElementById('newDesc').value
+  });
+  render();
+}
+
+function updateActivity(id, field, val) {
+  const day = state.days[state.activeDay];
+  const act = day.activities.find(a => a.id === id);
+  if (act) act[field] = val;
+}
+
+function deleteActivity(id) {
+  state.days[state.activeDay].activities = state.days[state.activeDay].activities.filter(a => a.id !== id);
+  render();
+}
+
+function moveActivity(i, dir) {
+  const acts = state.days[state.activeDay].activities;
+  const j = i + dir;
+  if (j < 0 || j >= acts.length) return;
+  [acts[i], acts[j]] = [acts[j], acts[i]];
+  render();
+}
+
+// ---- DRAG & DROP ----
+let dragIdx = null;
+function dragStart(e, i) { dragIdx = i; e.currentTarget.classList.add('dragging'); }
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function drop(e, i) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (dragIdx === null || dragIdx === i) return;
+  const acts = state.days[state.activeDay].activities;
+  const moved = acts.splice(dragIdx, 1)[0];
+  acts.splice(i, 0, moved);
+  dragIdx = null;
+  render();
+}
+
+// ---- PREVIEW ----
+function openPreview() {
+  document.getElementById('previewTitle').textContent = document.getElementById('tripTitle').value;
+  const sub = `${document.getElementById('clientName').value} · ${state.days.length} días`;
+  document.getElementById('previewSubtitle').textContent = sub;
+
+  const typeEmoji = { hotel:'🏨', vuelo:'✈️', actividad:'🏛', restaurante:'🍽', transporte:'🚂' };
+  let html = state.days.map((day, i) => `
+    <div class="preview-day">
+      <div class="preview-day-header">
+        <div class="preview-day-num">${i+1}</div>
+        <div>
+          <div class="preview-day-title">${day.name}</div>
+          <div style="font-size:12px;color:var(--text-light)">${formatDate(day.date)}</div>
+        </div>
+      </div>
+      ${day.activities.map(a => `
+        <div class="preview-activity">
+          <div class="preview-time">${a.time}</div>
+          <div>
+            <div class="preview-act-name">${typeEmoji[a.type]||''} ${a.name}</div>
+            ${a.desc ? `<div class="preview-act-desc">${a.desc}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('previewBody').innerHTML = html;
+  document.getElementById('previewOverlay').classList.add('open');
+}
+function closePreview(e) { if (e.target === e.currentTarget) document.getElementById('previewOverlay').classList.remove('open'); }
+function closePreviewBtn() { document.getElementById('previewOverlay').classList.remove('open'); }
+
+// ---- AI ----
+function toggleAI() { document.getElementById('aiPanel').classList.toggle('open'); }
+
+async function sendAIMessage(msg) {
+  const msgs = document.getElementById('aiMessages');
+
+  // User bubble
+  msgs.innerHTML += `<div class="ai-msg user">${msg}</div>`;
+
+  // Loading
+  const loadId = 'load-' + Date.now();
+  msgs.innerHTML += `<div class="ai-msg loading" id="${loadId}"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Build context
+  const day = state.days[state.activeDay];
+  const ctx = `El agente está creando un itinerario llamado "${document.getElementById('tripTitle').value}". El día activo es el ${state.activeDay + 1}: "${day.name}" con las siguientes actividades: ${day.activities.map(a => a.name).join(', ') || 'ninguna aún'}.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Eres un asistente experto en turismo y agencias de viajes. Ayudas a agentes de viaje a crear itinerarios atractivos y propuestas de viaje que venden. Responde en español de forma concisa, práctica y profesional. Contexto actual: ${ctx}`,
+        messages: [{ role: 'user', content: msg }]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Lo siento, no pude generar una respuesta.';
+    document.getElementById(loadId).outerHTML = `<div class="ai-msg assistant">${reply.replace(/\n/g, '<br>')}</div>`;
+  } catch (e) {
+    document.getElementById(loadId).outerHTML = `<div class="ai-msg assistant">Error al conectar con la IA. Intenta de nuevo.</div>`;
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function handleAIKey(e) { if (e.key === 'Enter') sendAIFromInput(); }
+function sendAIFromInput() {
+  const inp = document.getElementById('aiInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  sendAIMessage(val);
+}
+
+// ---- SAVE / SHARE ----
+function saveTrip() {
+  localStorage.setItem('travelcraft_trip', JSON.stringify(state));
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = '✓ Guardado';
+  setTimeout(() => btn.textContent = '💾 Guardar', 2000);
+}
+
+function shareTrip() {
+  const url = window.location.href;
+  navigator.clipboard?.writeText(url);
+  alert('¡Enlace de propuesta copiado! En la versión completa, esto genera un link único para tu cliente.');
+}
+
+// ---- INIT ----
+render();
+</script>
+</body>
+</html>

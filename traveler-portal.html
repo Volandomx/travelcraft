@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu viaje a Italia — TravelCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ivory: #FAF7F2;
+  --warm: #F2EDE4;
+  --warm2: #E8E0D4;
+  --sand: #C9B99A;
+  --sand-dark: #A09070;
+  --ink: #1C1814;
+  --ink2: #3D3730;
+  --muted: #7A7168;
+  --light: #B0A79C;
+  --forest: #2B4A35;
+  --forest-light: #EBF0EC;
+  --rust: #B84A30;
+  --rust-light: #F6EDE9;
+  --sky: #2A5A7A;
+  --sky-light: #E8F0F5;
+  --gold: #9A7A3A;
+  --gold-light: #F5F0E4;
+  --radius: 16px;
+  --shadow: 0 4px 32px rgba(28,24,20,0.08);
+  --shadow-sm: 0 2px 12px rgba(28,24,20,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--ivory); color: var(--ink); }
+
+/* HERO */
+.hero {
+  position: relative;
+  height: 480px;
+  overflow: hidden;
+  background: var(--ink);
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #1C2B20 0%, #2B4A35 40%, #3A6B4A 70%, #1C2B20 100%);
+  opacity: 0.95;
+}
+.hero-pattern {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(201,185,154,0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(201,185,154,0.06) 0%, transparent 40%);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 48px 48px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.agency-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8);
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.agency-dot { width: 6px; height: 6px; border-radius: 50%; background: #3DBA7E; }
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 56px; font-weight: 600; line-height: 1.1;
+  color: white; margin-bottom: 12px;
+}
+.hero-title em { color: rgba(201,185,154,0.9); font-style: italic; }
+.hero-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+.hero-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: rgba(255,255,255,0.7);
+}
+.hero-chip strong { color: white; }
+
+/* PROGRESS BAR */
+.trip-progress {
+  background: white;
+  border-bottom: 1px solid var(--warm2);
+  padding: 0 48px;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+.progress-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto; padding: 0;
+  scrollbar-width: none;
+}
+.progress-inner::-webkit-scrollbar { display: none; }
+.prog-step {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 14px 20px;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.prog-step:hover { background: var(--warm); }
+.prog-step.active { border-bottom-color: var(--forest); }
+.prog-num { width: 22px; height: 22px; border-radius: 50%; background: var(--warm2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted); }
+.prog-step.active .prog-num { background: var(--forest); color: white; }
+.prog-step.done .prog-num { background: var(--forest-light); color: var(--forest); }
+.prog-label { font-size: 11px; font-weight: 500; color: var(--muted); }
+.prog-step.active .prog-label { color: var(--forest); font-weight: 600; }
+.prog-step.done .prog-label { color: var(--forest); }
+
+/* CONTENT */
+.content { max-width: 900px; margin: 0 auto; padding: 48px 48px 80px; }
+
+/* SECTION HEADER */
+.section-header { margin-bottom: 28px; }
+.section-tag { font-size: 11px; font-weight: 600; color: var(--sand-dark); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; line-height: 1.2; }
+.section-desc { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+
+/* DAY CARD */
+.day-section { margin-bottom: 48px; }
+.day-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--warm2);
+}
+.day-number {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--forest); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600;
+  flex-shrink: 0;
+}
+.day-info {}
+.day-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; }
+.day-date-str { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.activities { display: flex; flex-direction: column; gap: 12px; }
+.activity {
+  display: grid; grid-template-columns: 60px 1fr;
+  gap: 16px; align-items: start;
+}
+.act-time-col { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+.act-time { font-size: 13px; font-weight: 600; color: var(--forest); }
+.act-connector { width: 1px; flex: 1; background: var(--warm2); margin-top: 6px; min-height: 24px; }
+.act-card {
+  background: white;
+  border: 1px solid var(--warm2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+.act-card:hover { box-shadow: var(--shadow); border-color: var(--sand); transform: translateY(-1px); }
+.act-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.act-type-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+}
+.type-actividad { background: var(--forest-light); color: var(--forest); }
+.type-hotel { background: var(--sky-light); color: var(--sky); }
+.type-restaurante { background: var(--rust-light); color: var(--rust); }
+.type-transporte { background: var(--gold-light); color: var(--gold); }
+.type-vuelo { background: #EEF2FA; color: #3A5FBA; }
+.act-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.act-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.act-included { display: inline-flex; align-items: center; gap: 4px; background: var(--forest-light); color: var(--forest); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; margin-top: 10px; }
+
+/* PAYMENT SECTION */
+.payment-card {
+  background: white;
+  border: 1px solid var(--warm2);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 32px;
+}
+.payment-header {
+  background: var(--forest);
+  padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.payment-header-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: white; }
+.total-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 8px 16px; text-align: right; }
+.total-label { font-size: 11px; color: rgba(255,255,255,0.7); }
+.total-value { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: white; }
+.payment-body { padding: 28px; }
+.installment-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--warm);
+}
+.installment-row:last-child { border-bottom: none; }
+.inst-status-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.inst-status-paid { background: var(--forest-light); }
+.inst-status-due { background: #FFF5E0; }
+.inst-status-future { background: var(--warm); }
+.inst-name { font-size: 14px; font-weight: 500; }
+.inst-due-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.inst-amount-val { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; margin-left: auto; }
+.inst-paid-val { color: var(--forest); }
+.inst-due-val { color: #C47A0A; }
+.pay-btn {
+  display: block; width: 100%;
+  padding: 16px;
+  background: var(--forest);
+  color: white;
+  border: none; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.2s;
+  letter-spacing: 0.2px;
+}
+.pay-btn:hover { background: #1e3628; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(43,74,53,0.3); }
+.secure-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* INFO SECTION */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.info-card { background: white; border: 1px solid var(--warm2); border-radius: var(--radius); padding: 20px; }
+.info-card-title { font-size: 11px; font-weight: 700; color: var(--sand-dark); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.info-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--warm); }
+.info-item:last-child { border-bottom: none; }
+.info-key { font-size: 12px; color: var(--muted); min-width: 80px; }
+.info-val { font-size: 13px; font-weight: 500; }
+
+/* CONTACT */
+.contact-bar {
+  background: var(--ink2);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  display: flex; align-items: center; gap: 20px;
+  color: white;
+}
+.agent-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--forest); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.2); }
+.agent-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; }
+.agent-role { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.contact-actions { margin-left: auto; display: flex; gap: 10px; }
+.contact-btn { padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.contact-wa { background: #25D366; color: white; border: none; }
+.contact-wa:hover { background: #20ba59; }
+.contact-email { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.2); }
+.contact-email:hover { background: rgba(255,255,255,0.2); }
+
+/* FOOTER */
+footer { background: var(--ink); text-align: center; padding: 20px; font-size: 12px; color: rgba(255,255,255,0.3); }
+footer span { color: rgba(255,255,255,0.5); }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.day-section { animation: fadeIn 0.4s ease both; }
+.day-section:nth-child(2) { animation-delay: 0.05s; }
+.day-section:nth-child(3) { animation-delay: 0.1s; }
+.day-section:nth-child(4) { animation-delay: 0.15s; }
+
+/* PAYMENT MODAL */
+.pay-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(28,24,20,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pay-modal-overlay.open { display: flex; }
+.pay-modal {
+  background: white;
+  border-radius: 24px;
+  width: 460px;
+  padding: 36px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.pay-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; margin-bottom: 4px; }
+.pay-modal-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+.pay-amount-display { text-align: center; padding: 24px; background: var(--forest-light); border-radius: 16px; margin-bottom: 24px; }
+.pay-amount-label { font-size: 13px; color: var(--forest); font-weight: 500; margin-bottom: 4px; }
+.pay-amount-num { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 600; color: var(--forest); }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+.form-input {
+  width: 100%; padding: 12px 16px;
+  border: 1.5px solid var(--warm2);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+  outline: none; transition: border-color 0.15s; background: var(--ivory);
+}
+.form-input:focus { border-color: var(--forest); background: white; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.confirm-pay-btn {
+  width: 100%; padding: 16px;
+  background: var(--forest); color: white;
+  border: none; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; margin-top: 8px;
+  transition: all 0.2s;
+}
+.confirm-pay-btn:hover { background: #1e3628; }
+.cancel-link { display: block; text-align: center; font-size: 13px; color: var(--muted); margin-top: 12px; cursor: pointer; }
+.cancel-link:hover { color: var(--ink); }
+
+/* SUCCESS */
+.success-screen { text-align: center; padding: 8px; }
+.success-icon { font-size: 56px; margin-bottom: 16px; }
+.success-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; margin-bottom: 8px; }
+.success-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <div class="hero-content">
+    <div class="agency-badge"><div class="agency-dot"></div>TravelCraft Viajes · Propuesta personalizada</div>
+    <div class="hero-title">Aventura por <em>Italia</em><br>— 7 días inolvidables</div>
+    <div class="hero-meta">
+      <div class="hero-chip">📅 <strong>14 Jun — 21 Jun 2025</strong></div>
+      <div class="hero-chip">👥 <strong>Familia García · 4 personas</strong></div>
+      <div class="hero-chip">📍 <strong>Roma · Florencia · Venecia</strong></div>
+      <div class="hero-chip">⭐ <strong>Todo incluido</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY DAY NAV -->
+<div class="trip-progress">
+  <div class="progress-inner" id="dayNav"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="mainContent">
+
+  <!-- ITINERARY SECTION -->
+  <div class="section-header">
+    <div class="section-tag">Tu itinerario completo</div>
+    <div class="section-title">Cada día, una nueva aventura</div>
+    <div class="section-desc">Hemos diseñado cada detalle para que disfrutes Italia al máximo, sin preocupaciones.</div>
+  </div>
+
+  <div id="itineraryDays"></div>
+
+  <!-- PAYMENT SECTION -->
+  <div class="section-header" style="margin-top:56px">
+    <div class="section-tag">Tu inversión</div>
+    <div class="section-title">Plan de pago flexible</div>
+    <div class="section-desc">Reserva con solo el 30% de anticipo y paga el resto antes de tu viaje.</div>
+  </div>
+
+  <div class="payment-card">
+    <div class="payment-header">
+      <div class="payment-header-title">Resumen de pagos</div>
+      <div class="total-badge">
+        <div class="total-label">Total del viaje</div>
+        <div class="total-value">$12,400 USD</div>
+      </div>
+    </div>
+    <div class="payment-body">
+      <div id="installmentsList"></div>
+      <button class="pay-btn" onclick="openPayModal()">
+        💳 Realizar pago pendiente — $3,720
+      </button>
+      <div class="secure-note">🔒 Pago seguro con encriptación SSL · Stripe Payments</div>
+    </div>
+  </div>
+
+  <!-- INFO GRID -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-card-title">✅ Incluido en tu viaje</div>
+      <div class="info-item"><div class="info-key">Vuelos</div><div class="info-val">CDMX → Roma → CDMX</div></div>
+      <div class="info-item"><div class="info-key">Hoteles</div><div class="info-val">7 noches 4–5 estrellas</div></div>
+      <div class="info-item"><div class="info-key">Traslados</div><div class="info-val">Aeropuerto + inter-ciudades</div></div>
+      <div class="info-item"><div class="info-key">Guías</div><div class="info-val">Privado en Roma y Florencia</div></div>
+      <div class="info-item"><div class="info-key">Tickets</div><div class="info-val">Coliseo, Uffizi, Vaticano</div></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">📋 Información práctica</div>
+      <div class="info-item"><div class="info-key">Visa</div><div class="info-val">No requerida (pasaporte MX)</div></div>
+      <div class="info-item"><div class="info-key">Moneda</div><div class="info-val">Euro (€) · Tip: lleva €200 cash</div></div>
+      <div class="info-item"><div class="info-key">Clima</div><div class="info-val">☀️ 24–29°C en junio</div></div>
+      <div class="info-item"><div class="info-key">Seguro</div><div class="info-val">Cobertura médica incluida</div></div>
+      <div class="info-item"><div class="info-key">Idioma</div><div class="info-val">Italiano (guías en español)</div></div>
+    </div>
+  </div>
+
+  <!-- CONTACT AGENT -->
+  <div class="contact-bar">
+    <div class="agent-avatar">👩‍✈️</div>
+    <div>
+      <div class="agent-name">Laura de Esesarte</div>
+      <div class="agent-role">Tu agente de viajes · Disponible lun–sáb 9am–7pm</div>
+    </div>
+    <div class="contact-actions">
+      <button class="contact-btn contact-wa" onclick="alert('En la versión completa abre WhatsApp directamente con tu agente.')">💬 WhatsApp</button>
+      <button class="contact-btn contact-email" onclick="alert('En la versión completa abre el email de tu agente.')">✉️ Email</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="pay-modal-overlay" id="payModal" onclick="closePayModal(event)">
+  <div class="pay-modal" onclick="event.stopPropagation()">
+    <div id="payFormContent">
+      <div class="pay-modal-title">Realizar pago</div>
+      <div class="pay-modal-sub">Pago seguro procesado por Stripe</div>
+      <div class="pay-amount-display">
+        <div class="pay-amount-label">Cuota a pagar: Anticipo 30%</div>
+        <div class="pay-amount-num">$3,720</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Número de tarjeta</label>
+        <input class="form-input" placeholder="4242 4242 4242 4242" maxlength="19" id="cardNum" oninput="formatCard(this)">
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Vencimiento</label>
+          <input class="form-input" placeholder="MM/AA" maxlength="5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CVV</label>
+          <input class="form-input" placeholder="123" maxlength="4" type="password">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre en tarjeta</label>
+        <input class="form-input" placeholder="FAMILIA GARCIA">
+      </div>
+      <button class="confirm-pay-btn" onclick="processPayment()">Pagar $3,720 USD</button>
+      <span class="cancel-link" onclick="closePayModalBtn()">Cancelar</span>
+    </div>
+    <div id="paySuccess" style="display:none">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">¡Pago confirmado!</div>
+        <div class="success-desc">Hemos recibido tu pago de <strong>$3,720 USD</strong>.<br>Recibirás un comprobante en tu correo en los próximos minutos.<br><br>¡Tu viaje a Italia está cada vez más cerca! 🇮🇹</div>
+        <button class="confirm-pay-btn" style="margin-top:24px" onclick="closePayModalBtn()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>TravelCraft</span> · Propuesta exclusiva para Familia García · Válida hasta 30 Jun 2025
+</footer>
+
+<script>
+const days = [
+  { num:1, name:'Llegada a Roma', date:'Sábado 14 junio, 2025', activities:[
+    {time:'14:00',type:'vuelo',name:'Llegada al aeropuerto de Fiumicino',desc:'Recepción con guía privado y traslado al hotel en vehículo de lujo. Tiempo estimado 45 min.',included:true},
+    {time:'17:00',type:'hotel',name:'Check-in Hotel Artemide ★★★★',desc:'Hotel boutique en el corazón de Roma, a pasos del Coliseo. Habitaciones superiores con vista a la ciudad.',included:true},
+    {time:'20:00',type:'restaurante',name:'Cena bienvenida — Osteria dell\'Angelo',desc:'Auténtica cocina romana. Reservación en nombre de la agencia. Recomendamos la cacio e pepe.',included:false},
+  ]},
+  { num:2, name:'Roma Clásica', date:'Domingo 15 junio, 2025', activities:[
+    {time:'09:00',type:'actividad',name:'Coliseo y Foro Romano',desc:'Visita guiada privada con acceso preferente al Coliseo, el Arco de Tito y el Foro Romano. Duración aprox. 3 horas.',included:true},
+    {time:'13:00',type:'restaurante',name:'Almuerzo libre en Trastevere',desc:'Tiempo libre en el barrio más bohemio de Roma para explorar restaurantes locales. Presupuesto aprox. €25–35 por persona.',included:false},
+    {time:'15:30',type:'actividad',name:'Piazza Navona y Fontana di Trevi',desc:'Paseo vespertino por las joyas del centro histórico. El guía les contará la historia de cada monumento.',included:true},
+  ]},
+  { num:3, name:'Hacia Florencia', date:'Lunes 16 junio, 2025', activities:[
+    {time:'08:00',type:'transporte',name:'Tren alta velocidad Roma → Florencia',desc:'Trenitalia Frecciarossa. Clase business, asientos reservados. Duración 1h 30min. Equipaje 23kg incluido.',included:true},
+    {time:'11:00',type:'actividad',name:'Galería de los Uffizi',desc:'La colección de arte renacentista más importante del mundo. Tickets con acceso prioritario. Duración aprox. 2.5 horas.',included:true},
+    {time:'15:00',type:'actividad',name:'Ponte Vecchio y Palazzo Vecchio',desc:'Paseo por el puente medieval y la plaza de la Señoría con guía local experto en arte e historia florentina.',included:true},
+    {time:'19:00',type:'hotel',name:'Check-in Hotel Savoy ★★★★★',desc:'Ubicado directamente en la Piazza della Repubblica. Habitaciones con vistas a la ciudad. Uno de los hoteles más icónicos de Florencia.',included:true},
+  ]},
+];
+
+const installments = [
+  {name:'Anticipo 30%',amount:3720,date:'Vence 28 feb 2025',status:'paid',icon:'✓'},
+  {name:'Segunda cuota 40%',amount:4960,date:'Vence 14 abr 2025',status:'paid',icon:'✓'},
+  {name:'Saldo final 30%',amount:3720,date:'Vence 10 jun 2025',status:'due',icon:'⚡'},
+];
+
+// Build day nav
+const nav = document.getElementById('dayNav');
+days.forEach((d,i) => {
+  const el = document.createElement('div');
+  el.className = 'prog-step done' + (i===0?' active':'');
+  el.innerHTML = `<div class="prog-num">${d.num}</div><div class="prog-label">${d.name.split(' ')[0]}</div>`;
+  el.onclick = () => {
+    document.querySelectorAll('.prog-step').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('day-'+d.num).scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  nav.appendChild(el);
+});
+
+// Build itinerary
+const typeLabel = {actividad:'Actividad',hotel:'Hotel',restaurante:'Restaurante',transporte:'Transporte',vuelo:'Vuelo'};
+const container = document.getElementById('itineraryDays');
+days.forEach(d => {
+  const sec = document.createElement('div');
+  sec.className = 'day-section'; sec.id = 'day-'+d.num;
+  sec.innerHTML = `
+    <div class="day-header">
+      <div class="day-number">${d.num}</div>
+      <div class="day-info"><div class="day-name">${d.name}</div><div class="day-date-str">${d.date}</div></div>
+    </div>
+    <div class="activities">${d.activities.map((a,i) => `
+      <div class="activity">
+        <div class="act-time-col">
+          <div class="act-time">${a.time}</div>
+          ${i<d.activities.length-1?'<div class="act-connector"></div>':''}
+        </div>
+        <div class="act-card">
+          <div class="act-type-row">
+            <span class="act-type-pill type-${a.type}">${typeLabel[a.type]}</span>
+            ${a.included?'<span class="act-included">✓ Incluido</span>':''}
+          </div>
+          <div class="act-name">${a.name}</div>
+          <div class="act-desc">${a.desc}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  container.appendChild(sec);
+});
+
+// Build installments
+const instList = document.getElementById('installmentsList');
+instList.innerHTML = installments.map(inst => {
+  const isPaid = inst.status==='paid';
+  const isDue = inst.status==='due';
+  return `<div class="installment-row">
+    <div class="inst-status-icon ${isPaid?'inst-status-paid':isDue?'inst-status-due':'inst-status-future'}">${isPaid?'✅':isDue?'⏰':'🔒'}</div>
+    <div><div class="inst-name">${inst.name}</div><div class="inst-due-date">${inst.date}</div></div>
+    <div class="inst-amount-val ${isPaid?'inst-paid-val':isDue?'inst-due-val':''}">$${inst.amount.toLocaleString()}</div>
+  </div>`;
+}).join('');
+
+function openPayModal() { document.getElementById('payModal').classList.add('open'); }
+function closePayModal(e) { if (e.target===e.currentTarget) document.getElementById('payModal').classList.remove('open'); }
+function closePayModalBtn() { document.getElementById('payModal').classList.remove('open'); document.getElementById('payFormContent').style.display=''; document.getElementById('paySuccess').style.display='none'; }
+
+function formatCard(inp) {
+  let v = inp.value.replace(/\D/g,'').substring(0,16);
+  inp.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+function processPayment() {
+  const btn = document.querySelector('.confirm-pay-btn');
+  btn.textContent = 'Procesando...';
+  btn.style.opacity = '0.7';
+  setTimeout(() => {
+    document.getElementById('payFormContent').style.display = 'none';
+    document.getElementById('paySuccess').style.display = 'block';
+  }, 1800);
+}
+</script>
+</body>
+</html>
